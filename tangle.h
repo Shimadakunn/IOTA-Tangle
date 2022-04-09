@@ -10,7 +10,7 @@ typedef struct arbre {
     struct arbre* dad2;
     struct arbre* son1;
     struct arbre* son2;
-    int checkSon1;
+    int checkSon1; // 
     int checkSon2;
 } Abr;
 

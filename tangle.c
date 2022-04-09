@@ -5,14 +5,14 @@
 #include <time.h>
 #include "tangle.h"
 
-Abr *tab[20];
+Abr *tab[20]; //tableau des noeuds encore non confirmé
 
-void add(Abr **arbre, int key){
+void add(Abr **arbre, int key){ //fonction ajouter dans le tangle
     #include <time.h>
 
     Abr *tangle = *arbre;
 
-    Abr *new = malloc(sizeof(Abr));
+    Abr *new = malloc(sizeof(Abr)); //initialisation du noeud à ajouter
     new->key = key;
     new->dad1 = NULL;
     new->dad2 = NULL;
@@ -23,60 +23,58 @@ void add(Abr **arbre, int key){
     new->checkSon1 = 0;
     new->checkSon2 = 0;
 
-    if(!tangle) { //initialisation
+    if(!tangle) { //cas ou le tangle n'admet aucun noeud
         tab[0] = new;
-        *arbre = new;
-
-        
+        *arbre = new;      
     }
-    else if(tangle && countTabNode() == 0) printf("error, no unconfirmed node available"); //cas ou il n'y a aucun noeud dispo
+    else if(tangle && countTabNode() == 0) printf("error, no unconfirmed node available"); //cas ou il n'y a aucun noeud non confirmé
     else if(countTabNode() == 1) { //cas ou il y a qu'un node dispo
-        trierTab();
+        trierTab(); //mets le noeud tout à gauche du tableau
         new->dad1 = tab[0];
-        if(!tab[0]->son1) tab[0]->son1 = new;
-        else if(!tab[0]->son2) tab[0]->son2 = new;
-        else printf("erreur d'enfants sur genesis");
-        tab[0]->state = tab[0]->state + 0.5;
-        if(tab[0]->state == 1){
-            tab[1] = tab[0]->son1;
-            tab[2] = tab[0]->son2;
-            removeTabNode();
+        if(!tab[0]->son1) tab[0]->son1 = new; //si l'enfant 1 n'est pas occupé
+        else if(!tab[0]->son2) tab[0]->son2 = new; //si l'enfant 2 n'est pas occupé
+        else printf("erreur d'enfants sur genesis"); 
+        tab[0]->state = tab[0]->state + 0.5; //maj de l'état du noeud 
+        if(tab[0]->state == 1){ //si le noeud a deux enfants
+            tab[1] = tab[0]->son1; //ajoute l'enfant 1 dans tab 1
+            tab[2] = tab[0]->son2; //ajoute l'enfant 2 dans tab 2
+            removeTabNode(); //enleve le noeud tab 0
         }
     }
     else{
         srand(time(NULL));
         removeTabNode(); //enleve les noeuds deja confirmés et mets tous les noeuds à gauche
-        int dad1 = rand()%countTabNode();
-        int dad2 = rand()%countTabNode();
-        if(dad1 == dad2) 
+        int dad1 = rand()%countTabNode(); //choisis un pere aléatoire
+        int dad2 = rand()%countTabNode(); //choisis un autre pere aléatoire
+        if(dad1 == dad2) //si ce sont les memes
         do{
             dad2 = rand()%countTabNode();
         }while(dad1 == dad2);
         printf("dad1 = %d, dad2 = %d\n", dad1, dad2);
 
-        new->dad1 = tab[dad1]; //les deux pères
-        new->dad2 = tab[dad2];
+        new->dad1 = tab[dad1]; //le père du noeud new devient dad1
+        new->dad2 = tab[dad2]; //le père 2 du noeud new devient dad2
 
-        if(!tab[dad1]->son1) tab[dad1]->son1 = new;
-        else if(!tab[dad1]->son2) tab[dad1]->son2 = new;
-        else printf("erreur d'enfants sur pere 1");
-        if(tab[dad1]->son1 && !tab[dad2]->son1) tab[dad2]->son1 = new;
-        else if(!tab[dad2]->son2) tab[dad2]->son2 = new;
+        if(!tab[dad1]->son1) tab[dad1]->son1 = new; //si le dad1 n'admet pas un fils 1 
+        else if(!tab[dad1]->son2) tab[dad1]->son2 = new; //si le dad1 n'admet pas un fils 2
+        else printf("erreur d'enfants sur pere 1"); 
+        if(tab[dad1]->son1 && !tab[dad2]->son1) tab[dad2]->son1 = new; //si le dad2 n'admet pas un fils 1
+        else if(!tab[dad2]->son2) tab[dad2]->son2 = new; //si le dad2 n'admet pas un fils 2
         else printf("erreur d'enfants sur pere 2");
 
-        tab[dad1]->state += 0.5;
+        tab[dad1]->state += 0.5; //maj des etat 
         tab[dad2]->state += 0.5;
-        tab[countTabNode()] = new; //ajoute le nouveau noeud dans la liste des transactions non confirmés
+        tab[countTabNode()] = new; //ajoute le nouveau noeud dans la liste des transactions non confirmées
     }
 
 }
 
 //fonctions sur le tableau
-void initTab(){
+void initTab(){ //initialisation du tableau des noeuds non confirmées
     for (int i = 0; i <20; i++) tab[i] = NULL;
 }
 
-void affichTab(){
+void affichTab(){  //fonction affichage du tableau
     printf("---Affichage du TAB---\n");
     for (int i = 0; i <20; i++) {
         if(tab[i]) printf("%d ", tab[i]->key);
@@ -85,19 +83,19 @@ void affichTab(){
     printf("\n");
 }
 
-int countTabNull(){
+int countTabNull(){ //compte le nombre de null dans le tableau des noeuds
     int n = 0;
     for (int i = 0; i <20; i++) if(!tab[i]) n++;
     return n;
 }
 
-int countTabNode(){
+int countTabNode(){ //compte le nombre de null dans le tableau des noeuds
     int n = 0;
     for (int i = 0; i <20; i++) if(tab[i]) n++;
     return n;
 }
 
-void trierTab(){
+void trierTab(){ //mets tous les noeuds non nuls à gauche
     if(countTabNode()==0) return;
 
     int index = 0;
@@ -111,7 +109,7 @@ void trierTab(){
     }
 }
 
-void removeTabNode(){
+void removeTabNode(){ //enlève les noeuds avec l'état 1 
     if(countTabNode()==0) return;
     trierTab();
     
@@ -139,7 +137,7 @@ void testTab(){
 }
 
 //fonction d'affichage
-void printDot(Abr *arbre, char *name){
+void printDot(Abr *arbre, char *name){ //affichage du fichier .dot
 
     FILE* fichier = NULL;
     fichier = fopen(name,"w");
@@ -152,7 +150,7 @@ void printDot(Abr *arbre, char *name){
     fputs("\n}", fichier);
 }
 
-void dotRecursive(Abr *arbre, char *name){
+void dotRecursive(Abr *arbre, char *name){ //fonction recursive appelé dans le fonction printDot
 
     if(!arbre) return;
 
